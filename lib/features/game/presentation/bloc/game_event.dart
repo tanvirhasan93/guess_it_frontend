@@ -4,7 +4,7 @@ class StartGameEvent extends GameEvent {
   final int attemptsCount;
   final int wordLength;
 
-  StartGameEvent(this.attemptsCount, this.wordLength);
+  StartGameEvent({required this.attemptsCount, required this.wordLength});
 }
 
 class EnterAttemptEvent extends GameEvent {}

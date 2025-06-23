@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height: 10),
               Text(
-                'By DevVibe Youtube',
+                'By Hans Tomas',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w400,
                   letterSpacing: 2,
