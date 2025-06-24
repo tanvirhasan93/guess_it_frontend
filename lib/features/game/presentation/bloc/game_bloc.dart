@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:guess_it_frontend/features/game/domain/game_repository.dart';
 import 'package:guess_it_frontend/features/game/presentation/bloc/game_event.dart';
 import 'package:guess_it_frontend/features/game/presentation/bloc/game_state.dart';
 
 class GameBloc extends Bloc<GameEvent, GameState> {
-  GameBloc() : super(GameState.initial()) {
+  final GameRepository gameRepository;
+  GameBloc({required this.gameRepository}) : super(GameState.initial()) {
     on<StartGameEvent>(onStartGameEvent);
     on<EnterKeyEvent>(onEnterKeyEvent);
     on<DeleteKeyEvent>(onDeleteKeyEvent);
@@ -13,12 +15,21 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   Future onStartGameEvent(StartGameEvent event, Emitter<GameState> emit) async {
-    emit(
-      state.copyWith(
-        status: GameStatus.inProgress,
-        word: 'TEST',
-        attemptsCount: event.attemptsCount,
-      ),
+    emit(state.copyWith(status: GameStatus.loading));
+    var result = await gameRepository.getRandomWord(event.wordLength);
+    result.fold(
+      (l) {
+        emit(state.copyWith(status: GameStatus.error, errorMessage: l.message));
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            status: GameStatus.inProgress,
+            word: r.toUpperCase(),
+            attemptsCount: event.attemptsCount,
+          ),
+        );
+      },
     );
   }
 
@@ -63,17 +74,33 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if (word.isEmpty || currentAttempt.length < word.length) {
       return;
     }
-    emit(
-      state.copyWith(
-        status: GameStatus.inProgress,
-        attempts: [...attempt, currentAttempt],
-        currentAttempt: '',
-      ),
+
+    var checkWord = await gameRepository.checkWord(currentAttempt);
+    checkWord.fold(
+      (l) {
+        emit(
+          state.copyWith(
+            errorMessage: l.message,
+            status: GameStatus.error,
+            currentAttempt: '',
+          ),
+        );
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            status: GameStatus.inProgress,
+            attempts: [...attempt, currentAttempt],
+            currentAttempt: '',
+          ),
+        );
+        if (word == currentAttempt) {
+          emit(state.copyWith(status: GameStatus.win));
+        } else if ((state.attempts?.length ?? 0) ==
+            (state.attemptsCount ?? 0)) {
+          emit(state.copyWith(status: GameStatus.loss));
+        }
+      },
     );
-    if (word == currentAttempt) {
-      emit(state.copyWith(status: GameStatus.win));
-    } else if ((state.attempts?.length ?? 0) == (state.attemptsCount ?? 0)) {
-      emit(state.copyWith(status: GameStatus.loss));
-    }
   }
 }

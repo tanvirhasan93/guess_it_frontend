@@ -19,7 +19,7 @@ class AttemptsRowWidget extends StatelessWidget {
         final currentAttempt = state.currentAttempt ?? '';
         final isCurrentAttempt = attemptIndex == previousAttempts.length;
         return Row(
-          children: List.generate(4, (letterIndex) {
+          children: List.generate(word.length, (letterIndex) {
             var text = _getLetter(
               letterIndex,
               attemptIndex,

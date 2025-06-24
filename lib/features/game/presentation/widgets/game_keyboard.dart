@@ -114,7 +114,9 @@ class GameKeyboard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(3),
           child: ElevatedButton(
-            onPressed: () => onKeyPressed(key),
+            onPressed: () {
+              onKeyPressed(key);
+            },
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.zero,
               backgroundColor: getKeyColor(context, state, key),

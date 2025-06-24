@@ -38,6 +38,11 @@ class GamePage extends StatelessWidget {
         ),
       child: BlocConsumer<GameBloc, GameState>(
         builder: (context, state) {
+          if (state.status == GameStatus.loading) {
+            return Scaffold(
+              body: Center(child: CircularProgressIndicator.adaptive()),
+            );
+          }
           return Scaffold(
             appBar: AppBar(
               title: Text(
@@ -83,6 +88,10 @@ class GamePage extends StatelessWidget {
               },
               barrierDismissible: false,
             );
+          } else if (state.status == GameStatus.error) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('${state.errorMessage}')));
           }
         },
       ),
